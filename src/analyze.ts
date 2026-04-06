@@ -56,11 +56,31 @@ export async function analyze(config: CrawlerConfig): Promise<void> {
   } else {
     console.log(`\n🤖 Sending ${analyses.length} pages to LLM (${config.model})...\n`);
 
-    for (const { route, analysis } of analyses) {
-      process.stdout.write(`   Describing ${route.path}...`);
-      const page = await describeRoute(route, analysis, config.openaiApiKey, config.model);
+    // Run LLM calls in parallel with concurrency limit of 5
+    const CONCURRENCY = 5;
+    const pending = analyses.map(({ route, analysis }) => ({
+      route,
+      analysis,
+      started: false,
+    }));
+
+    const results: Array<{ route: typeof routes[0]; page: PageDescription }> = [];
+
+    for (let i = 0; i < pending.length; i += CONCURRENCY) {
+      const batch = pending.slice(i, i + CONCURRENCY);
+      const batchResults = await Promise.all(
+        batch.map(async ({ route, analysis }) => {
+          const page = await describeRoute(route, analysis, config.openaiApiKey!, config.model);
+          console.log(`   Describing ${route.path}... ✓ (${page.interactions.length} interactions)`);
+          return { route, page };
+        })
+      );
+      results.push(...batchResults);
+    }
+
+    // Sort results back to original order
+    for (const { page } of results) {
       pages.push(page);
-      console.log(` ✓ (${page.interactions.length} interactions)`);
     }
   }
 

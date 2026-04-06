@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Navigate to Dashboard",
+    "goal": "Navigate to the dashboard page from the home page",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/dashboard",
+      "maxSteps": 5,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Navigate to Donations",
+    "goal": "Navigate to the donations page to view donation history",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/dashboard/donations",
+      "maxSteps": 6,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Navigate to Profile",
+    "goal": "Navigate to the user profile settings page",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/dashboard/profile",
+      "maxSteps": 6,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Navigate to Tax Forms",
+    "goal": "Find and navigate to the tax forms section",
+    "startUrl": "http://localhost:3000/dashboard",
+    "successCriteria": {
+      "finalUrlContains": "/dashboard/tax-forms",
+      "maxSteps": 5,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Navigate to Payments from Dashboard",
+    "goal": "Go to the payments page from the dashboard",
+    "startUrl": "http://localhost:3000/dashboard",
+    "successCriteria": {
+      "finalUrlContains": "/dashboard/payments",
+      "maxSteps": 4,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "Navigate to Onboarding",
+    "goal": "Navigate to the onboarding page to set up a new account",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/onboarding",
+      "maxSteps": 5,
+      "maxDurationMs": 30000
+    }
+  }
+]

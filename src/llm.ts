@@ -25,22 +25,22 @@ export async function describeRoute(
 
   const prompt = buildPrompt(route, analysis);
 
-  const response = await openai.chat.completions.create({
-    model,
-    temperature: 0.1,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: prompt },
-    ],
-  });
-
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    return fallbackDescription(route, analysis);
-  }
-
   try {
+    const response = await openai.chat.completions.create({
+      model,
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: prompt },
+      ],
+    }, { timeout: 60000 });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      return fallbackDescription(route, analysis);
+    }
+
     const parsed = JSON.parse(content) as PageDescription;
     return {
       ...parsed,
