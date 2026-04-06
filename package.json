@@ -1,26 +1,43 @@
 {
-  "name": "crawler",
+  "name": "web-agent",
   "version": "0.1.0",
-  "private": true,
+  "description": "Generate browser.txt — a machine-readable site map that lets AI agents navigate websites deterministically.",
+  "type": "module",
+  "bin": {
+    "web-agent": "./dist/cli.js"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "start": "node dist/cli.js",
+    "analyze": "node dist/cli.js analyze",
+    "agent": "node dist/cli.js agent"
+  },
+  "keywords": [
+    "ai",
+    "browser-agent",
+    "web-agent",
+    "browser-txt",
+    "site-map",
+    "automation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "next": "16.2.2",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "@babel/parser": "^7.29.2",
+    "@babel/traverse": "^7.29.0",
+    "@babel/types": "^7.29.0",
+    "@types/node": "^25.5.2",
+    "commander": "^14.0.3",
+    "dotenv": "^17.4.1",
+    "glob": "^13.0.6",
+    "openai": "^6.33.0",
+    "typescript": "^6.0.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.2",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@types/babel__traverse": "^7.28.0"
   }
 }
