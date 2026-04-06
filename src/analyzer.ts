@@ -62,12 +62,6 @@ export function analyzeComponent(
       }
     },
 
-    VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
-      if (t.isIdentifier(path.node.id) && /^[A-Z]/.test(path.node.id.name)) {
-        componentName = path.node.id.name;
-      }
-    },
-
     // Extract import paths for dependency tracking
     ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
       const source = path.node.source.value;
@@ -105,11 +99,12 @@ export function analyzeComponent(
       // Check for links (Next.js Link or <a>)
       if (name === "Link" || name === "a") {
         const href = getAttrValue(attrs, "href") || getAttrValue(attrs, "to");
-        if (href) {
+        const dynamicHref = href || getDynamicAttrHint(attrs, "href") || getDynamicAttrHint(attrs, "to");
+        if (dynamicHref) {
           interactions.push({
             type: "link",
             label: extractTextContent(path),
-            href,
+            href: dynamicHref,
             selector: buildSelector(name, attrs),
           });
         }
@@ -193,6 +188,57 @@ export function analyzeComponent(
       const call = path.node;
       const apiCall = detectApiCall(call, sourceCode);
       if (apiCall) apiCalls.push(apiCall);
+    },
+
+    // Detect navigation arrays: const navItems = [{ href: "/path", label: "..." }, ...]
+    VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
+      // Component name extraction (keep existing)
+      if (t.isIdentifier(path.node.id) && /^[A-Z]/.test(path.node.id.name)) {
+        componentName = path.node.id.name;
+      }
+
+      // Navigation array extraction
+      if (t.isIdentifier(path.node.id) && t.isArrayExpression(path.node.init)) {
+        const items = path.node.init.elements;
+        const navLinks = items
+          .filter((el): el is t.ObjectExpression => t.isObjectExpression(el))
+          .map((obj) => {
+            const hrefProp = obj.properties.find(
+              (p): p is t.ObjectProperty =>
+                t.isObjectProperty(p) &&
+                t.isIdentifier(p.key) &&
+                p.key.name === "href" &&
+                t.isStringLiteral(p.value)
+            );
+            const labelProp = obj.properties.find(
+              (p): p is t.ObjectProperty =>
+                t.isObjectProperty(p) &&
+                t.isIdentifier(p.key) &&
+                p.key.name === "label" &&
+                t.isStringLiteral(p.value)
+            );
+            if (hrefProp && labelProp) {
+              return {
+                href: (hrefProp.value as t.StringLiteral).value,
+                label: (labelProp.value as t.StringLiteral).value,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean) as Array<{ href: string; label: string }>;
+
+        // Only register if we found at least 2 nav-like entries
+        if (navLinks.length >= 2) {
+          for (const nav of navLinks) {
+            interactions.push({
+              type: "link",
+              label: nav.label,
+              href: nav.href,
+              selector: `link`,
+            });
+          }
+        }
+      }
     },
   });
 
@@ -307,6 +353,27 @@ function getAttrValue(attrs: t.JSXAttribute[], name: string): string | undefined
     attr.value.expression.quasis.length === 1
   ) {
     return attr.value.expression.quasis[0].value.cooked ?? undefined;
+  }
+  return undefined;
+}
+
+/**
+ * For dynamic attribute values (e.g. href={item.href}), return a hint string
+ * so we at least know a link exists even if we can't resolve the static value.
+ */
+function getDynamicAttrHint(attrs: t.JSXAttribute[], name: string): string | undefined {
+  const attr = attrs.find(
+    (a) => t.isJSXIdentifier(a.name) && a.name.name === name
+  );
+  if (!attr?.value) return undefined;
+  if (t.isJSXExpressionContainer(attr.value)) {
+    const expr = attr.value.expression;
+    if (t.isIdentifier(expr)) return `(dynamic:${expr.name})`;
+    if (t.isMemberExpression(expr) && t.isIdentifier(expr.property)) {
+      return `(dynamic:${expr.property.name})`;
+    }
+    if (t.isTemplateLiteral(expr)) return "(dynamic:template)";
+    return "(dynamic)";
   }
   return undefined;
 }

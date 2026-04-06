@@ -1,87 +1,69 @@
 {
   "site": "donation-better",
-  "generated": "2026-04-06T04:31:02.568Z",
+  "generated": "2026-04-06T04:41:16.732Z",
   "generator": "web-agent v0.1.0",
   "pages": [
     {
       "path": "/",
-      "description": "This is the homepage of DonationBetter, a platform for making secure donations to organizations.",
+      "description": "The home page of DonationBetter, a platform for making secure and tax-deductible donations to organizations.",
       "preconditions": [],
       "interactions": [
         {
           "element": "button.px-4",
-          "label": "Sign In",
-          "description": "When this button is clicked, a modal will open allowing the user to sign in.",
+          "label": "Refresh Page",
+          "description": "When this button is clicked, the page will refresh.",
           "action": {
-            "type": "modal",
-            "result": "User can enter their credentials to log in."
+            "type": "state_change",
+            "result": "The page reloads, displaying the current content."
           },
           "confidence": "verified",
           "preconditions": []
-        },
-        {
-          "element": "button",
-          "label": "Get Started",
-          "description": "When this button is clicked, a modal will open allowing the user to sign up for an account.",
-          "action": {
-            "type": "modal",
-            "result": "User can fill out a form to create a new account."
-          },
-          "confidence": "verified",
-          "preconditions": []
-        },
-        {
-          "element": "link",
-          "label": "Go to Dashboard",
-          "description": "When this link is clicked, the user will be navigated to their dashboard.",
-          "action": {
-            "type": "navigation",
-            "destination": "/dashboard",
-            "result": "User is taken to their dashboard where they can manage their donations."
-          },
-          "confidence": "verified",
-          "preconditions": [
-            "User must be logged in"
-          ]
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link",
+          "label": "Go to Dashboard",
+          "destination": "/dashboard",
+          "description": "This link navigates to the user's dashboard, where they can manage their donations and subscriptions."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "SignInButton",
-          "description": "This button appears for users who are not logged in, allowing them to sign in.",
-          "condition": "User is not logged in",
+          "element": "Sign In Button",
+          "description": "This button allows users to sign in to their account.",
+          "condition": "Visible when the user is not signed in.",
           "confidence": "verified"
         },
         {
-          "element": "SignUpButton",
-          "description": "This button appears for users who are not logged in, allowing them to sign up.",
-          "condition": "User is not logged in",
+          "element": "Get Started Button",
+          "description": "This button allows new users to sign up for an account.",
+          "condition": "Visible when the user is not signed in.",
           "confidence": "verified"
         },
         {
-          "element": "Go to Dashboard button",
-          "description": "This button appears for logged-in users, allowing them to access their dashboard.",
-          "condition": "User is logged in",
+          "element": "Go to Dashboard Button",
+          "description": "This button navigates to the dashboard for signed-in users.",
+          "condition": "Visible when the user is signed in.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/[slug]",
-      "description": "This page allows users to make donations to a specific temple based on the provided slug.",
+      "description": "This page allows users to make donations to a specific temple, providing information about the temple and a donation form.",
       "preconditions": [
-        "User must have a valid temple slug in the URL"
+        "The temple must exist and be accessible via the provided slug."
       ],
       "interactions": [
         {
           "element": "button.mb-4",
           "label": "Back to Donation Form",
-          "description": "When this button is clicked, it resets the donation form and returns the user to the donation input section.",
+          "description": "When this button is clicked, it returns the user to the donation form.",
           "action": {
             "type": "state_change",
-            "result": "The donation form is reset and displayed again."
+            "result": "The donation form is displayed again."
           },
           "confidence": "verified",
           "preconditions": []
@@ -89,16 +71,16 @@
         {
           "element": "form.rounded-lg",
           "label": "(no label)",
-          "description": "When this form is submitted, it processes the donation by calling the payment API with the specified amount and message.",
+          "description": "When this form is submitted, it processes the donation through the Stripe payment system.",
           "action": {
             "type": "api_call",
             "method": "POST",
             "endpoint": "/api/stripe/pay",
-            "result": "The payment is processed, and the client secret is returned for Stripe checkout."
+            "result": "The donation is processed, and the user receives a client secret for the payment."
           },
           "confidence": "verified",
           "preconditions": [
-            "User must enter a valid donation amount greater than 0"
+            "The form fields must be filled out correctly."
           ]
         },
         {
@@ -107,7 +89,7 @@
           "description": "This input field collects the donation amount from the user.",
           "action": {
             "type": "state_change",
-            "result": "The amount is updated in the state."
+            "result": "The donation amount is updated in the state."
           },
           "confidence": "verified",
           "preconditions": []
@@ -129,7 +111,7 @@
           "description": "When this button is clicked, it refreshes the current page.",
           "action": {
             "type": "state_change",
-            "result": "The page reloads."
+            "result": "The page reloads, displaying the current state."
           },
           "confidence": "verified",
           "preconditions": []
@@ -145,14 +127,14 @@
               "type": "text",
               "required": true,
               "description": "The amount of money the user wishes to donate.",
-              "validation": "Must be a positive number"
+              "validation": "Must be a positive number."
             },
             {
               "name": "message",
-              "type": "text",
+              "type": "textarea",
               "required": false,
               "description": "An optional message to accompany the donation.",
-              "validation": "No specific validation"
+              "validation": "No specific validation."
             }
           ],
           "submitsTo": "api.stripe.pay"
@@ -164,38 +146,50 @@
           "label": "(no label)",
           "destination": "/",
           "description": "This link takes the user back to the home page."
+        },
+        {
+          "element": "a.flex",
+          "label": "Visit Website",
+          "destination": "(dynamic:website)",
+          "description": "This link directs the user to the temple's website for more information."
         }
       ],
       "conditionalElements": [
         {
-          "element": "div containing temple address",
+          "element": "div",
           "description": "Displays the temple's address if available.",
-          "condition": "When the temple has an address",
+          "condition": "When the temple has an address.",
           "confidence": "verified"
         },
         {
-          "element": "div containing temple phone number",
+          "element": "div",
           "description": "Displays the temple's phone number if available.",
-          "condition": "When the temple has a phone number",
+          "condition": "When the temple has a phone number.",
           "confidence": "verified"
         },
         {
-          "element": "a containing temple website",
+          "element": "a",
           "description": "Displays a link to the temple's website if available.",
-          "condition": "When the temple has a website",
+          "condition": "When the temple has a website.",
           "confidence": "verified"
         },
         {
-          "element": "div containing error message",
-          "description": "Displays an error message if there is an error during payment processing.",
-          "condition": "When there is an error",
+          "element": "p",
+          "description": "Displays a default message about the temple if no description is provided.",
+          "condition": "When the temple does not have a description.",
+          "confidence": "verified"
+        },
+        {
+          "element": "div",
+          "description": "Displays a message indicating that donations are coming soon if the temple is not ready to accept payments.",
+          "condition": "When the temple is not stripe ready.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/dashboard",
-      "description": "This page provides an overview of the user's donation activity, displaying statistics and trends related to their donations.",
+      "description": "This page provides an overview of donation activities for users based on their roles as either a devotee or a temple.",
       "preconditions": [
         "User must be logged in",
         "User must have a role of either 'devotee' or 'temple'"
@@ -204,10 +198,10 @@
         {
           "element": "donationdatefilter",
           "label": "Donation Date Filter",
-          "description": "When this filter is changed, the displayed donation statistics update according to the selected date range.",
+          "description": "When the date filter is changed, the dashboard updates to reflect donation statistics for the selected date range.",
           "action": {
             "type": "state_change",
-            "result": "The statistics displayed on the dashboard are updated to reflect the selected date range."
+            "result": "The dashboard displays updated statistics based on the selected date range."
           },
           "confidence": "verified",
           "preconditions": []
@@ -217,12 +211,10 @@
           "label": "Refresh Status",
           "description": "When this button is clicked, it triggers a refresh of the donation status.",
           "action": {
-            "type": "api_call",
-            "method": "POST",
-            "endpoint": "/api/stripe/getAccountStatus",
+            "type": "state_change",
             "result": "The donation status is refreshed and updated on the dashboard."
           },
-          "confidence": "verified",
+          "confidence": "inferred",
           "preconditions": []
         }
       ],
@@ -230,44 +222,73 @@
       "navigation": [
         {
           "element": "link",
-          "label": "Payments",
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates back to the dashboard overview."
+        },
+        {
+          "element": "link",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the page where users can find organizations."
+        },
+        {
+          "element": "link",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Navigates to the page displaying the user's donation history."
+        },
+        {
+          "element": "link",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the page where users can access their tax forms."
+        },
+        {
+          "element": "link",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates to the user's profile page."
+        },
+        {
+          "element": "link",
+          "label": "Manage Payments",
           "destination": "/dashboard/payments",
-          "description": "This link navigates to the payments page where users can view their payment history and manage payment methods."
+          "description": "Navigates to the page for managing payment methods."
         }
       ],
       "conditionalElements": [
         {
           "element": "Monthly Trend Chart",
-          "description": "Displays a line chart of donation trends over the selected time period.",
-          "condition": "When there is donation history available for the selected date range.",
+          "description": "Displays a chart of donation trends over the selected date range.",
+          "condition": "Visible when there is donation history for the selected date range.",
           "confidence": "verified"
         },
         {
           "element": "Donations by Organization Chart",
-          "description": "Displays a pie chart of donations made to different organizations.",
-          "condition": "When there are donations recorded by temple.",
+          "description": "Displays a pie chart of donations categorized by organization.",
+          "condition": "Visible when there are donations recorded by temple.",
           "confidence": "verified"
         },
         {
-          "element": "Recent Donations",
-          "description": "Shows a list of recent donations made by the user.",
-          "condition": "When there are recent donations available.",
+          "element": "Recent Donations List",
+          "description": "Displays a list of recent donations made by the user.",
+          "condition": "Visible when there are recent donations.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/dashboard/donations",
-      "description": "This page allows users to view their donation history and manage their donations.",
+      "description": "This page allows users to view their donation history and receipts.",
       "preconditions": [
-        "User must be logged in",
-        "User must have a role of either 'devotee' or 'temple'"
+        "User must be logged in as either a devotee or a temple"
       ],
       "interactions": [
         {
           "element": "donationdatefilter",
           "label": "Date Filter",
-          "description": "When the date filter is changed, the displayed donations will update based on the selected date range.",
+          "description": "Changes the date range of donations displayed based on user selection.",
           "action": {
             "type": "state_change",
             "result": "The donation list updates to reflect the selected date range."
@@ -276,56 +297,85 @@
           "preconditions": []
         },
         {
+          "element": "link.font-medium",
+          "label": "Temple Name Link",
+          "description": "Navigates to the temple's donation page when clicked.",
+          "action": {
+            "type": "navigation",
+            "destination": "/{donation.temple.donation_link}",
+            "result": "User is taken to the temple's donation page."
+          },
+          "confidence": "verified",
+          "preconditions": [
+            "Donation must have an associated temple."
+          ]
+        },
+        {
+          "element": "link",
+          "label": "View Receipt",
+          "description": "Opens the receipt for the selected donation.",
+          "action": {
+            "type": "navigation",
+            "destination": "/receipt/{donation._id}",
+            "result": "User views the detailed receipt for the donation."
+          },
+          "confidence": "verified",
+          "preconditions": []
+        },
+        {
+          "element": "link",
+          "label": "Donate Again",
+          "description": "Navigates to the temple's donation page to make another donation.",
+          "action": {
+            "type": "navigation",
+            "destination": "/{donation.temple.donation_link}",
+            "result": "User is taken to the temple's donation page."
+          },
+          "confidence": "verified",
+          "preconditions": [
+            "Donation must have an associated temple."
+          ]
+        },
+        {
           "element": "button.flex-1",
           "label": "Export",
-          "description": "When this button is clicked, the user's donation history will be exported as a CSV file.",
+          "description": "Exports the donation history as a CSV file.",
           "action": {
             "type": "unknown",
             "result": "A CSV file containing the donation history is downloaded."
           },
           "confidence": "verified",
           "preconditions": []
-        },
-        {
-          "element": "button",
-          "label": "Add Donation",
-          "description": "When this button is clicked, a form will appear to allow the user to add a new donation.",
-          "action": {
-            "type": "modal",
-            "result": "A form for adding a new donation is displayed."
-          },
-          "confidence": "inferred",
-          "preconditions": []
         }
       ],
       "forms": [
         {
           "name": "Manual Donation Form",
-          "description": "This form collects details for adding a manual donation.",
+          "description": "Collects information for adding a manual donation.",
           "fields": [
             {
-              "name": "amount",
+              "name": "manual-donation-amount",
               "type": "text",
               "required": true,
               "description": "The amount of the donation.",
               "validation": "Must be a positive number."
             },
             {
-              "name": "date",
+              "name": "manual-donation-date",
               "type": "text",
               "required": true,
               "description": "The date of the donation.",
               "validation": "Must be a valid date."
             },
             {
-              "name": "method",
+              "name": "manual-donation-method",
               "type": "text",
               "required": true,
               "description": "The method of donation (e.g., credit card, PayPal).",
               "validation": "Must be a valid method."
             },
             {
-              "name": "notes",
+              "name": "manual-donation-notes",
               "type": "textarea",
               "required": false,
               "description": "Any additional notes regarding the donation.",
@@ -338,22 +388,52 @@
       "navigation": [
         {
           "element": "link",
-          "label": "Temple Name",
-          "destination": "/temple/[templeId]",
-          "description": "Clicking on the temple name will navigate to the temple's donation page."
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates back to the main dashboard."
+        },
+        {
+          "element": "link",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the page for finding temples."
+        },
+        {
+          "element": "link",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Refreshes the current donations page."
+        },
+        {
+          "element": "link",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the tax forms page."
+        },
+        {
+          "element": "link",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates to the user's profile page."
+        },
+        {
+          "element": "link",
+          "label": "Manage Payments",
+          "destination": "/dashboard/payments",
+          "description": "Navigates to the payment management page."
         }
       ],
       "conditionalElements": [
         {
           "element": "div",
-          "description": "Displays a message when the user has no donations.",
+          "description": "Displays a message when there are no donations.",
           "condition": "When the user has not made any donations yet.",
           "confidence": "verified"
         },
         {
           "element": "div",
-          "description": "Displays the donation details when the user has made donations.",
-          "condition": "When the user has donations to display.",
+          "description": "Displays the donation history when there are donations.",
+          "condition": "When the user has made donations.",
           "confidence": "verified"
         }
       ]
@@ -362,7 +442,7 @@
       "path": "/dashboard/payments",
       "description": "This page allows temple users to manage their Stripe account for accepting donations.",
       "preconditions": [
-        "User must be logged in as a temple"
+        "User must be logged in as a temple user"
       ],
       "interactions": [
         {
@@ -377,42 +457,79 @@
           },
           "confidence": "verified",
           "preconditions": [
-            "User must have a valid Stripe ID"
+            "User must have a valid Stripe account ID"
           ]
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link",
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates back to the main dashboard page."
+        },
+        {
+          "element": "link",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the page where users can find organizations."
+        },
+        {
+          "element": "link",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Navigates to the donations page to view donation history."
+        },
+        {
+          "element": "link",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the tax forms page for managing tax-related documents."
+        },
+        {
+          "element": "link",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates to the user's profile page for managing personal information."
+        },
+        {
+          "element": "link",
+          "label": "Manage Payments",
+          "destination": "/dashboard/payments",
+          "description": "Navigates to the payments management page."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "Loader2",
-          "description": "Indicates that the account status is currently being checked.",
+          "element": "Loader",
+          "description": "Displays a loading spinner while checking the account status.",
           "condition": "When the account status is being checked",
           "confidence": "verified"
         },
         {
-          "element": "CheckCircle2",
-          "description": "Indicates that the account is fully set up to accept donations.",
-          "condition": "When the account is fully configured",
+          "element": "CheckCircle",
+          "description": "Indicates that the account is fully set up and ready to accept donations.",
+          "condition": "When the account is fully set up",
           "confidence": "verified"
         },
         {
           "element": "AlertCircle",
           "description": "Indicates that the account is pending verification.",
-          "condition": "When the account details have been submitted but not fully set up",
+          "condition": "When the account is pending verification",
           "confidence": "verified"
         },
         {
           "element": "XCircle",
           "description": "Indicates that setup is required for the account.",
-          "condition": "When the account is not pending verification and not fully set up",
+          "condition": "When setup is not complete",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/dashboard/profile",
-      "description": "This page allows users to manage their personal information and account settings based on their role as either a devotee or a temple.",
+      "description": "This page allows users to manage their personal information and account settings.",
       "preconditions": [
         "User must be logged in",
         "User must have a role of either 'devotee' or 'temple'"
@@ -424,11 +541,11 @@
           "description": "When this button is clicked, the user can edit their personal information.",
           "action": {
             "type": "state_change",
-            "result": "The form fields become editable, allowing the user to update their information."
+            "result": "The form fields become editable."
           },
           "confidence": "verified",
           "preconditions": [
-            "User is not currently editing"
+            "User must not be currently editing"
           ]
         },
         {
@@ -439,111 +556,148 @@
             "type": "api_call",
             "method": "POST",
             "endpoint": "/api/users/updateDevoteeProfile",
-            "result": "The profile is updated with the new information."
+            "result": "The profile is updated and the user exits editing mode."
           },
           "confidence": "verified",
           "preconditions": [
-            "User is currently editing"
+            "User must be currently editing"
           ]
         },
         {
           "element": "button",
           "label": "Cancel",
-          "description": "When this button is clicked, the user cancels the editing process.",
+          "description": "When this button is clicked, the user cancels the editing of their profile.",
           "action": {
             "type": "state_change",
-            "result": "The form returns to the non-editing state, discarding any unsaved changes."
+            "result": "The user exits editing mode without saving changes."
           },
           "confidence": "verified",
           "preconditions": [
-            "User is currently editing"
+            "User must be currently editing"
           ]
         }
       ],
       "forms": [
         {
           "name": "Profile Update Form",
-          "description": "This form collects the user's personal information such as first name, last name, phone number, and address.",
+          "description": "This form collects the user's first name, last name, phone number, and address.",
           "fields": [
             {
               "name": "firstName",
               "type": "text",
               "required": true,
-              "description": "User's first name",
+              "description": "The user's first name",
               "validation": "Must not be empty"
             },
             {
               "name": "lastName",
               "type": "text",
               "required": true,
-              "description": "User's last name",
+              "description": "The user's last name",
               "validation": "Must not be empty"
             },
             {
               "name": "phoneNumber",
               "type": "text",
               "required": false,
-              "description": "User's phone number",
-              "validation": "Must be a valid phone number"
+              "description": "The user's phone number",
+              "validation": "Must be a valid phone number format"
             },
             {
               "name": "address.line1",
               "type": "text",
               "required": true,
-              "description": "First line of the address",
+              "description": "The first line of the user's address",
               "validation": "Must not be empty"
             },
             {
               "name": "address.line2",
               "type": "text",
               "required": false,
-              "description": "Second line of the address",
-              "validation": "Optional"
+              "description": "The second line of the user's address (optional)",
+              "validation": "No validation"
             },
             {
               "name": "address.city",
               "type": "text",
               "required": true,
-              "description": "City of residence",
+              "description": "The city of the user's address",
               "validation": "Must not be empty"
             },
             {
               "name": "address.state",
               "type": "text",
               "required": true,
-              "description": "State of residence",
+              "description": "The state of the user's address",
               "validation": "Must not be empty"
             },
             {
               "name": "address.postalCode",
               "type": "text",
               "required": true,
-              "description": "Postal code",
-              "validation": "Must be a valid postal code"
+              "description": "The postal code of the user's address",
+              "validation": "Must be a valid postal code format"
             },
             {
               "name": "address.country",
               "type": "text",
               "required": true,
-              "description": "Country of residence",
+              "description": "The country of the user's address",
               "validation": "Must not be empty"
             }
           ],
           "submitsTo": "api.users.updateDevoteeProfile"
         }
       ],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link",
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates to the main dashboard page."
+        },
+        {
+          "element": "link",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the page where users can find organizations."
+        },
+        {
+          "element": "link",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Navigates to the page where users can view their donations."
+        },
+        {
+          "element": "link",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the page where users can access tax forms."
+        },
+        {
+          "element": "link",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates back to the user's profile settings."
+        },
+        {
+          "element": "link",
+          "label": "Manage Payments",
+          "destination": "/dashboard/payments",
+          "description": "Navigates to the page where users can manage their payments."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "Edit button",
-          "description": "This button appears to allow the user to edit their personal information.",
-          "condition": "When the user is not currently editing their profile.",
+          "element": "Edit Button",
+          "description": "Allows the user to edit their profile information.",
+          "condition": "Visible when the user is not currently editing their profile.",
           "confidence": "verified"
         },
         {
-          "element": "Profile not found message",
-          "description": "This message appears when the user's profile cannot be found.",
-          "condition": "When the profile data is undefined.",
+          "element": "Profile Information",
+          "description": "Displays the user's profile information.",
+          "condition": "Visible when the user's profile is successfully fetched.",
           "confidence": "verified"
         }
       ]
@@ -557,33 +711,84 @@
       ],
       "interactions": [
         {
-          "element": "button",
-          "label": "Download Receipt",
-          "description": "When this button is clicked, the receipt for the corresponding donation will be downloaded.",
+          "element": "a[href='/receipt/${donation._id}']",
+          "label": "View Receipt",
+          "description": "When this link is clicked, the user will be taken to a detailed view of the specific donation receipt.",
+          "action": {
+            "type": "navigation",
+            "destination": "/receipt/${donation._id}",
+            "result": "The user sees the detailed receipt for the selected donation."
+          },
+          "confidence": "verified",
+          "preconditions": [
+            "Receipt must exist for the donation"
+          ]
+        },
+        {
+          "element": "a[href='${donation.receiptUrl}']",
+          "label": "Stripe Receipt",
+          "description": "When this link is clicked, the user will download the receipt from Stripe for the specific donation.",
           "action": {
             "type": "api_call",
             "method": "GET",
-            "endpoint": "/api/donations/download-receipt",
-            "result": "The receipt file will be downloaded to the user's device."
+            "endpoint": "${donation.receiptUrl}",
+            "result": "The user downloads the Stripe receipt for the selected donation."
           },
-          "confidence": "inferred",
+          "confidence": "verified",
           "preconditions": [
-            "The donation must have a receipt URL available"
+            "Receipt URL must be available and the payment provider must be Stripe"
           ]
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link[href='/dashboard']",
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates to the main dashboard page."
+        },
+        {
+          "element": "link[href='/dashboard/temples']",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the page where users can find organizations."
+        },
+        {
+          "element": "link[href='/dashboard/donations']",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Navigates to the page where users can view their donations."
+        },
+        {
+          "element": "link[href='/dashboard/tax-forms']",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the current tax forms page."
+        },
+        {
+          "element": "link[href='/dashboard/profile']",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates to the user's profile page."
+        },
+        {
+          "element": "link[href='/dashboard/payments']",
+          "label": "Manage Payments",
+          "destination": "/dashboard/payments",
+          "description": "Navigates to the page where users can manage their payment methods."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "Donation Summary Section",
-          "description": "Displays a summary of donations by year if there are completed donations.",
+          "element": "div[class='grid gap-4 md:grid-cols-3']",
+          "description": "Displays a summary of donations by year when there are completed donations.",
           "condition": "When there are completed donations available.",
           "confidence": "verified"
         },
         {
-          "element": "No Donations Message",
-          "description": "Informs the user that there are no donation receipts available yet.",
+          "element": "div[class='text-center py-12']",
+          "description": "Informs the user that no donation receipts are available yet.",
           "condition": "When there are no completed donations.",
           "confidence": "verified"
         }
@@ -591,72 +796,115 @@
     },
     {
       "path": "/dashboard/temples",
-      "description": "This page allows users to search for temples and organizations to support through donations.",
+      "description": "This page allows devotees to search for organizations and make donations.",
       "preconditions": [
         "User must be logged in as a devotee"
       ],
       "interactions": [
         {
           "element": "input.pl-10",
-          "label": "Search Input",
-          "description": "When the user types in this input field, the list of temples will be filtered based on the search query.",
+          "label": "Search by name, city, or state...",
+          "description": "When the user types in this search bar, the list of organizations updates based on the search query.",
           "action": {
             "type": "state_change",
-            "result": "The displayed list of temples updates to show only those matching the search criteria."
+            "result": "The displayed list of organizations updates to match the search criteria."
           },
           "confidence": "verified",
           "preconditions": []
         },
         {
           "element": "button",
-          "label": "Donate Button",
-          "description": "When this button is clicked, the user is redirected to the donation page for the selected temple.",
+          "label": "Donate",
+          "description": "When this button is clicked, the user is redirected to the donation page for the respective temple.",
           "action": {
             "type": "navigation",
             "destination": "/{temple.donation_link}",
-            "result": "The user is taken to the donation page for the selected temple."
+            "result": "The user is taken to the donation page for that temple."
+          },
+          "confidence": "verified",
+          "preconditions": []
+        },
+        {
+          "element": "a.text-primary",
+          "label": "Website link",
+          "description": "When this link is clicked, the user is taken to the temple's website in a new tab.",
+          "action": {
+            "type": "navigation",
+            "destination": "{temple.website}",
+            "result": "The temple's website opens in a new tab."
           },
           "confidence": "verified",
           "preconditions": []
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link",
+          "label": "Dashboard",
+          "destination": "/dashboard",
+          "description": "Navigates to the main dashboard page."
+        },
+        {
+          "element": "link",
+          "label": "Find Organizations",
+          "destination": "/dashboard/temples",
+          "description": "Navigates to the temples search page."
+        },
+        {
+          "element": "link",
+          "label": "View Donations",
+          "destination": "/dashboard/donations",
+          "description": "Navigates to the donations overview page."
+        },
+        {
+          "element": "link",
+          "label": "Tax Forms",
+          "destination": "/dashboard/tax-forms",
+          "description": "Navigates to the tax forms page."
+        },
+        {
+          "element": "link",
+          "label": "Profile",
+          "destination": "/dashboard/profile",
+          "description": "Navigates to the user's profile page."
+        },
+        {
+          "element": "link",
+          "label": "Manage Payments",
+          "destination": "/dashboard/payments",
+          "description": "Navigates to the payments management page."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "Temple Description",
-          "description": "Displays a brief description of the temple if available.",
-          "condition": "When a temple has a description provided.",
+          "element": "p",
+          "description": "Displays the temple's description if available.",
+          "condition": "When a temple has a description.",
           "confidence": "verified"
         },
         {
-          "element": "Temple Phone Number",
-          "description": "Displays the phone number of the temple if available.",
-          "condition": "When a temple has a phone number provided.",
+          "element": "div",
+          "description": "Displays the temple's phone number if available.",
+          "condition": "When a temple has a phone number.",
           "confidence": "verified"
         },
         {
-          "element": "Temple Website",
-          "description": "Displays the website link of the temple if available.",
-          "condition": "When a temple has a website provided.",
+          "element": "div",
+          "description": "Displays the temple's website link if available.",
+          "condition": "When a temple has a website.",
           "confidence": "verified"
         },
         {
-          "element": "Loading State",
-          "description": "Shows a loading animation while the temples are being fetched.",
+          "element": "div",
+          "description": "Shows a loading placeholder when the temples data is being fetched.",
           "condition": "When the temples data is undefined.",
           "confidence": "verified"
         },
         {
-          "element": "No Results Message",
-          "description": "Displays a message indicating no organizations were found based on the search query.",
-          "condition": "When no temples match the search criteria.",
-          "confidence": "verified"
-        },
-        {
-          "element": "Temples Grid",
-          "description": "Displays a grid of temple cards when temples are available.",
-          "condition": "When there are temples to display.",
+          "element": "div",
+          "description": "Displays a message when no organizations are found.",
+          "condition": "When the search returns no results.",
           "confidence": "verified"
         }
       ]
@@ -679,7 +927,7 @@
           },
           "confidence": "verified",
           "preconditions": [
-            "Button is enabled and visible"
+            "User must not be navigating"
           ]
         },
         {
@@ -693,134 +941,147 @@
           },
           "confidence": "verified",
           "preconditions": [
-            "Button is enabled and visible"
+            "User must not be navigating"
           ]
+        },
+        {
+          "element": "button.px-4",
+          "label": "Refresh Page",
+          "description": "When this button is clicked, the page will refresh to try loading again.",
+          "action": {
+            "type": "state_change",
+            "result": "The page reloads, allowing the user to retry the current action."
+          },
+          "confidence": "verified",
+          "preconditions": []
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link-selector",
+          "label": "Continue as an organization",
+          "destination": "/onboarding/temple/step1",
+          "description": "This link takes the user to the onboarding step for organizations."
+        },
+        {
+          "element": "link-selector",
+          "label": "Continue as a donor",
+          "destination": "/onboarding/devotee",
+          "description": "This link takes the user to the onboarding page for donors."
+        }
+      ],
       "conditionalElements": [
         {
           "element": "Loader2",
-          "description": "A loading indicator that appears when the user is navigating to the next step after selecting a role.",
+          "description": "A loading indicator that appears when the user is navigating after selecting a role.",
           "condition": "When the user selects a role and the navigation is pending.",
           "confidence": "verified"
         },
         {
           "element": "Building2",
-          "description": "An icon representing the organization role that appears when the user has selected the temple role.",
-          "condition": "When the user selects the temple role and is not pending navigation.",
+          "description": "An icon representing organizations that appears when the user selects the temple role.",
+          "condition": "When the user selects the temple role and is not pending.",
           "confidence": "verified"
         },
         {
           "element": "Heart",
-          "description": "An icon representing the donor role that appears when the user has selected the devotee role.",
-          "condition": "When the user selects the devotee role and is not pending navigation.",
+          "description": "An icon representing donors that appears when the user selects the devotee role.",
+          "condition": "When the user selects the devotee role and is not pending.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/onboarding/devotee",
-      "description": "This page allows new donors to set up their profile by providing personal information and contact details.",
+      "description": "This page allows new donors to set up their profile by providing personal information and address details.",
       "preconditions": [
         "User must be logged in"
       ],
       "interactions": [
         {
           "element": "form.space-y-6",
-          "label": "Submit",
-          "description": "When the form is submitted, the user's profile is created and they are redirected to the dashboard.",
+          "label": "Complete Onboarding",
+          "description": "When this button is clicked, the user's profile is created with the provided information, and the user is redirected to the dashboard.",
           "action": {
             "type": "api_call",
             "method": "POST",
             "endpoint": "/api/users/createUserProfile",
-            "result": "User profile is created, role is set to 'devotee', and the user is redirected to the dashboard."
+            "result": "User profile is created, user role is set to 'devotee', and the user is redirected to the dashboard."
           },
           "confidence": "verified",
           "preconditions": [
-            "All required fields must be filled out correctly"
+            "User must fill in required fields: First Name, Last Name"
           ]
-        },
-        {
-          "element": "button.px-4",
-          "label": "Refresh Page",
-          "description": "When this button is clicked, the page refreshes to update the authentication state.",
-          "action": {
-            "type": "state_change",
-            "result": "The page is refreshed."
-          },
-          "confidence": "verified",
-          "preconditions": []
         }
       ],
       "forms": [
         {
           "name": "Devotee Onboarding Form",
-          "description": "This form collects the user's first name, last name, phone number, and address for their donor profile.",
+          "description": "This form collects the user's first name, last name, phone number, and address for profile creation.",
           "fields": [
             {
               "name": "firstName",
               "type": "text",
               "required": true,
               "description": "The user's first name.",
-              "validation": "Must not be empty."
+              "validation": "Must be at least 1 character long."
             },
             {
               "name": "lastName",
               "type": "text",
               "required": true,
               "description": "The user's last name.",
-              "validation": "Must not be empty."
+              "validation": "Must be at least 1 character long."
             },
             {
               "name": "phoneNumber",
               "type": "text",
               "required": false,
               "description": "The user's phone number for communications and donation receipts.",
-              "validation": "Optional."
+              "validation": "Must be a valid phone number if provided."
             },
             {
               "name": "address.line1",
               "type": "text",
               "required": false,
               "description": "The street address of the user.",
-              "validation": "Optional."
+              "validation": "Must be at least 5 characters long if provided."
             },
             {
               "name": "address.line2",
               "type": "text",
               "required": false,
-              "description": "Additional address information like apartment or suite number.",
-              "validation": "Optional."
+              "description": "Additional address information (optional).",
+              "validation": "Maximum length of 100 characters."
             },
             {
               "name": "address.city",
               "type": "text",
               "required": false,
               "description": "The city of the user's address.",
-              "validation": "Optional."
+              "validation": "Must be at least 2 characters long if provided."
             },
             {
               "name": "address.state",
               "type": "text",
               "required": false,
               "description": "The state of the user's address.",
-              "validation": "Optional."
+              "validation": "Must be at least 2 characters long if provided."
             },
             {
               "name": "address.postalCode",
               "type": "text",
               "required": false,
               "description": "The postal code of the user's address.",
-              "validation": "Optional."
+              "validation": "Must be at least 3 characters long if provided."
             },
             {
               "name": "address.country",
               "type": "text",
               "required": false,
               "description": "The country of the user's address.",
-              "validation": "Defaults to 'United States'."
+              "validation": "Must be at least 2 characters long if provided."
             }
           ],
           "submitsTo": "form.space-y-6"
@@ -828,21 +1089,21 @@
       ],
       "navigation": [
         {
-          "element": "link-selector",
-          "label": "Dashboard",
-          "destination": "/dashboard",
-          "description": "After completing the onboarding, the user is redirected to the dashboard to access their account."
+          "element": "button.px-4",
+          "label": "Refresh Page",
+          "destination": "/onboarding/devotee",
+          "description": "This button refreshes the current page to reset the form and any error messages."
         }
       ],
       "conditionalElements": [
         {
-          "element": "Error Message",
-          "description": "Displays an error message if there is an issue during the onboarding process.",
+          "element": "div.error-message",
+          "description": "Displays an error message if there is an error during the onboarding process.",
           "condition": "When an error occurs during form submission.",
           "confidence": "verified"
         },
         {
-          "element": "Loader",
+          "element": "Loader2",
           "description": "Indicates that the form is currently being submitted.",
           "condition": "When the form is being submitted.",
           "confidence": "verified"
@@ -853,35 +1114,78 @@
       "path": "/onboarding/temple/step1",
       "description": "This page allows users to enter basic information about their organization as part of the onboarding process.",
       "preconditions": [
-        "User must be logged in to access this page"
+        "User must be logged in to access this page."
       ],
       "interactions": [
         {
           "element": "form.space-y-6",
-          "label": "Submit",
-          "description": "When the user fills out the form with organization details and clicks submit, the data is validated and, if valid, saved and the user is navigated to the next step.",
+          "label": "Continue to Step 2 →",
+          "description": "When this button is clicked, the form data is validated and submitted. If the donation link is available, the user is navigated to the next step.",
           "action": {
             "type": "api_call",
             "method": "POST",
-            "endpoint": "/api/onboarding/temple/step1",
+            "endpoint": "/api/temples/checkDonationLinkAvailability",
             "destination": "/onboarding/temple/step2",
-            "result": "The user's data is saved and they are taken to step 2 of the onboarding process."
+            "result": "The user is taken to the next step of the onboarding process."
           },
           "confidence": "verified",
           "preconditions": [
-            "All required fields must be filled out correctly",
-            "Donation link must be available"
+            "User must have filled out the form correctly and the donation link must be available."
           ]
+        },
+        {
+          "element": "phoneinput#phoneNumber",
+          "label": "Phone Number",
+          "description": "When the phone number field is changed, it updates the form state with the new value.",
+          "action": {
+            "type": "state_change",
+            "result": "The phone number is updated in the form state."
+          },
+          "confidence": "verified",
+          "preconditions": []
+        },
+        {
+          "element": "input#templeName",
+          "label": "Organization Name",
+          "description": "When the organization name field is changed, it updates the form state with the new value.",
+          "action": {
+            "type": "state_change",
+            "result": "The organization name is updated in the form state."
+          },
+          "confidence": "verified",
+          "preconditions": []
+        },
+        {
+          "element": "input#contactFirstName",
+          "label": "First Name",
+          "description": "When the first name field is changed, it updates the form state with the new value.",
+          "action": {
+            "type": "state_change",
+            "result": "The first name is updated in the form state."
+          },
+          "confidence": "verified",
+          "preconditions": []
+        },
+        {
+          "element": "input#contactLastName",
+          "label": "Last Name",
+          "description": "When the last name field is changed, it updates the form state with the new value.",
+          "action": {
+            "type": "state_change",
+            "result": "The last name is updated in the form state."
+          },
+          "confidence": "verified",
+          "preconditions": []
         },
         {
           "element": "input#donation_link",
           "label": "Donation Page URL",
-          "description": "As the user types in the donation link, the system checks its availability in real-time.",
+          "description": "When the donation link field is changed, it updates the form state with the new value and checks its availability.",
           "action": {
             "type": "api_call",
             "method": "GET",
             "endpoint": "/api/temples/checkDonationLinkAvailability",
-            "result": "The system indicates whether the donation link is available or not."
+            "result": "The availability of the donation link is checked and displayed to the user."
           },
           "confidence": "verified",
           "preconditions": []
@@ -897,21 +1201,21 @@
               "type": "text",
               "required": true,
               "description": "The official name of the organization.",
-              "validation": "Must not be empty."
+              "validation": "Must be 2-100 characters long and can only contain letters, numbers, and certain special characters."
             },
             {
               "name": "contactFirstName",
               "type": "text",
               "required": true,
               "description": "The first name of the contact person.",
-              "validation": "Must not be empty."
+              "validation": "Must be 2-50 characters long and can only contain letters."
             },
             {
               "name": "contactLastName",
               "type": "text",
               "required": true,
               "description": "The last name of the contact person.",
-              "validation": "Must not be empty."
+              "validation": "Must be 2-50 characters long and can only contain letters."
             },
             {
               "name": "phoneNumber",
@@ -924,8 +1228,8 @@
               "name": "donation_link",
               "type": "text",
               "required": true,
-              "description": "The URL for the organization's donation page.",
-              "validation": "Must be a valid URL and available."
+              "description": "The unique URL for the organization's donation page.",
+              "validation": "Must be 3-50 characters long, only lowercase letters, numbers, and hyphens allowed."
             }
           ],
           "submitsTo": "form.space-y-6"
@@ -934,23 +1238,23 @@
       "navigation": [
         {
           "element": "link-selector",
-          "label": "Next Step",
+          "label": "Continue to Step 2 →",
           "destination": "/onboarding/temple/step2",
-          "description": "This link takes the user to the next step of the onboarding process after successfully submitting the form."
+          "description": "This link takes the user to the next step of the onboarding process after submitting the form."
         }
       ],
       "conditionalElements": [
         {
-          "element": "Loader2",
-          "description": "A loading indicator that appears when the form is being submitted.",
-          "condition": "When the form is being submitted.",
+          "element": "p",
+          "description": "Displays a message indicating the availability of the donation link.",
+          "condition": "When the donation link is being checked or its availability status changes.",
           "confidence": "verified"
         },
         {
-          "element": "p",
-          "description": "A message indicating the availability of the donation link.",
-          "condition": "When the donation link is being checked or its availability is determined.",
-          "confidence": "inferred"
+          "element": "Loader2",
+          "description": "Shows a loading spinner while the form is being submitted.",
+          "condition": "When the form is in the process of being submitted.",
+          "confidence": "verified"
         }
       ]
     },
@@ -958,13 +1262,27 @@
       "path": "/onboarding/temple/step2",
       "description": "This page allows users to provide additional details about their organization as part of the onboarding process.",
       "preconditions": [
-        "User must have completed step 1 of the onboarding process"
+        "User must have completed step 1 of the onboarding process."
       ],
       "interactions": [
         {
+          "element": "button.h-11",
+          "label": "Back",
+          "description": "When this button is clicked, the user is navigated back to the previous step of the onboarding process.",
+          "action": {
+            "type": "navigation",
+            "destination": "/onboarding/temple/step1",
+            "result": "User is taken back to step 1 of the onboarding process."
+          },
+          "confidence": "verified",
+          "preconditions": [
+            "Button is enabled when not submitting."
+          ]
+        },
+        {
           "element": "form.space-y-6",
-          "label": "Submit",
-          "description": "When this form is submitted, it sends the organization details to create a temple profile and updates the user's role.",
+          "label": "Submit Form",
+          "description": "When the form is submitted, it triggers the creation of a temple profile with the provided details.",
           "action": {
             "type": "api_call",
             "method": "POST",
@@ -973,106 +1291,101 @@
           },
           "confidence": "verified",
           "preconditions": [
-            "All required fields must be filled out correctly"
+            "All required fields must be filled out correctly."
           ]
-        },
-        {
-          "element": "button.h-11",
-          "label": "Back",
-          "description": "When this button is clicked, the user is redirected back to the previous step of the onboarding process.",
-          "action": {
-            "type": "navigation",
-            "destination": "/onboarding/temple/step1",
-            "result": "The user is taken back to step 1 of the onboarding process."
-          },
-          "confidence": "verified",
-          "preconditions": []
         }
       ],
       "forms": [
         {
-          "name": "templeDetailsForm",
-          "description": "This form collects additional details about the organization, including tax ID, website, description, and address.",
+          "name": "Temple Details Form",
+          "description": "This form collects additional details about the user's organization, including tax ID, website, description, and address.",
           "fields": [
             {
               "name": "taxId",
               "type": "text",
               "required": false,
               "description": "The organization's 501(c)(3) tax identification number.",
-              "validation": "Optional, max length 10"
+              "validation": "Must match format XX-XXXXXXX if provided."
             },
             {
               "name": "website",
               "type": "url",
               "required": false,
               "description": "The official website of the organization.",
-              "validation": "Optional, must be a valid URL"
+              "validation": "Must be a valid URL if provided."
             },
             {
               "name": "description",
               "type": "text",
               "required": false,
               "description": "A brief description of the organization's history, mission, and community activities.",
-              "validation": "Optional, max 500 characters"
+              "validation": "Maximum 500 characters."
             },
             {
               "name": "address.line1",
               "type": "text",
               "required": true,
               "description": "The street address of the organization.",
-              "validation": "Required"
+              "validation": "Must be at least 5 characters."
             },
             {
               "name": "address.line2",
               "type": "text",
               "required": false,
-              "description": "Additional address information such as apartment or suite number.",
-              "validation": "Optional"
+              "description": "Apartment, suite, etc. (optional).",
+              "validation": "Maximum 100 characters."
             },
             {
               "name": "address.city",
               "type": "text",
               "required": true,
               "description": "The city where the organization is located.",
-              "validation": "Required"
+              "validation": "Must be at least 2 characters."
             },
             {
               "name": "address.state",
               "type": "text",
               "required": true,
               "description": "The state where the organization is located.",
-              "validation": "Required"
+              "validation": "Must be at least 2 characters."
             },
             {
               "name": "address.postalCode",
               "type": "text",
               "required": true,
-              "description": "The postal code for the organization's address.",
-              "validation": "Required"
+              "description": "The ZIP code for the organization's address.",
+              "validation": "Must be at least 3 characters."
             },
             {
               "name": "address.country",
               "type": "text",
-              "required": false,
+              "required": true,
               "description": "The country where the organization is located.",
-              "validation": "Defaults to 'United States'"
+              "validation": "Must be at least 2 characters."
             }
           ],
-          "submitsTo": "form.space-y-6"
+          "submitsTo": "api.users.createTempleProfile"
         }
       ],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "button.h-11",
+          "label": "Back",
+          "destination": "/onboarding/temple/step1",
+          "description": "This link takes the user back to the previous step of the onboarding process."
+        }
+      ],
       "conditionalElements": [
         {
-          "element": "error message",
+          "element": "div.error-message",
           "description": "Displays an error message if there is an error during form submission.",
-          "condition": "When there is an error in the submission process",
+          "condition": "When there is an error message to display.",
           "confidence": "verified"
         },
         {
-          "element": "loading spinner",
+          "element": "Loader2",
           "description": "Shows a loading spinner while the form is being submitted.",
-          "condition": "When the form is in the process of being submitted",
+          "condition": "When the form is in the process of being submitted.",
           "confidence": "verified"
         }
       ]
@@ -1081,14 +1394,14 @@
       "path": "/receipt/[donationId]",
       "description": "This page displays the receipt for a specific donation, including donor details and temple information.",
       "preconditions": [
-        "User must have a valid donation ID",
-        "User must be logged in to view the receipt"
+        "User must be logged in",
+        "User must have access to the specific donation receipt"
       ],
       "interactions": [
         {
           "element": "button.px-4",
           "label": "Go Back",
-          "description": "When this button is clicked, the user will be taken back to the previous page.",
+          "description": "When this button is clicked, the user will navigate back to the previous page.",
           "action": {
             "type": "navigation",
             "destination": "previous page",
@@ -1114,19 +1427,19 @@
       "conditionalElements": [
         {
           "element": "p",
-          "description": "Displays the second line of the temple's address if available.",
+          "description": "Displays the second line of the temple's address if it exists.",
           "condition": "When the temple has a second line in its address.",
           "confidence": "verified"
         },
         {
           "element": "p",
-          "description": "Displays the tax ID of the temple if available.",
+          "description": "Displays the tax ID of the temple if it exists.",
           "condition": "When the temple has a tax ID.",
           "confidence": "verified"
         },
         {
           "element": "p",
-          "description": "Displays the transaction ID if available.",
+          "description": "Displays the transaction ID of the donation if it exists.",
           "condition": "When the donation has a payment intent ID.",
           "confidence": "verified"
         },
@@ -1145,17 +1458,17 @@
         {
           "element": "span",
           "description": "Displays loading text while the receipt data is being fetched.",
-          "condition": "When the loading spinner is active.",
+          "condition": "When the loading text is provided.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/return",
-      "description": "This page displays the result of a payment session, informing the user whether their donation was successful or if there were issues with the session.",
+      "description": "This page displays the result of a donation transaction, providing feedback based on the payment session status.",
       "preconditions": [
         "User must have a valid session_id in the URL",
-        "User must be logged in to view their donation details"
+        "User must be logged in to view their donations"
       ],
       "interactions": [
         {
@@ -1187,11 +1500,11 @@
         {
           "element": "link.inline-flex",
           "label": "View My Donations",
-          "description": "When this link is clicked, the user is redirected to the donations section of their dashboard.",
+          "description": "When this link is clicked, the user is redirected to the donations page within their dashboard.",
           "action": {
             "type": "navigation",
             "destination": "/dashboard/donations",
-            "result": "User is taken to the donations overview."
+            "result": "User is taken to the donations overview page."
           },
           "confidence": "verified",
           "preconditions": [
@@ -1205,69 +1518,91 @@
           "action": {
             "type": "navigation",
             "destination": "/sign-up",
-            "result": "User is taken to the account creation page."
+            "result": "User is taken to the sign-up page."
           },
           "confidence": "verified",
-          "preconditions": []
+          "preconditions": [
+            "User must not be logged in"
+          ]
         },
         {
           "element": "a.text-primary",
           "label": "Contact Support",
-          "description": "When this link is clicked, the user's email client opens to send an email to support.",
+          "description": "When this link is clicked, the user's email client opens to send a message to support.",
           "action": {
             "type": "unknown",
             "result": "User can send an email to support."
           },
           "confidence": "verified",
           "preconditions": []
-        },
-        {
-          "element": "button.px-4",
-          "label": "Refresh Page",
-          "description": "When this button is clicked, the page refreshes to check for updated session information.",
-          "action": {
-            "type": "state_change",
-            "result": "The page reloads to reflect the latest session status."
-          },
-          "confidence": "inferred",
-          "preconditions": []
         }
       ],
       "forms": [],
-      "navigation": [],
+      "navigation": [
+        {
+          "element": "link.inline-flex",
+          "label": "Return Home",
+          "destination": "/",
+          "description": "This link takes the user back to the home page."
+        },
+        {
+          "element": "link.inline-flex",
+          "label": "Go to Dashboard",
+          "destination": "/dashboard",
+          "description": "This link takes the user to their dashboard."
+        },
+        {
+          "element": "link.inline-flex",
+          "label": "View My Donations",
+          "destination": "/dashboard/donations",
+          "description": "This link takes the user to the donations page within their dashboard."
+        },
+        {
+          "element": "link.inline-flex",
+          "label": "Create an Account",
+          "destination": "/sign-up",
+          "description": "This link takes the user to the sign-up page to create a new account."
+        },
+        {
+          "element": "a.text-primary",
+          "label": "Contact Support",
+          "destination": "mailto:support@example.com",
+          "description": "This link allows the user to contact support via email."
+        }
+      ],
       "conditionalElements": [
         {
           "element": "div",
-          "description": "Displays a message indicating the donation was successful along with details if the session is complete.",
-          "condition": "When the session status is 'complete'",
+          "description": "Displays a message indicating that the session has expired.",
+          "condition": "When the session status is 'expired'",
           "confidence": "verified"
         },
         {
           "element": "div",
-          "description": "Displays an error message if the session is not found.",
-          "condition": "When there is no session_id in the URL",
+          "description": "Displays a message indicating that the session is invalid.",
+          "condition": "When the session status is not found or invalid.",
           "confidence": "verified"
         },
         {
           "element": "div",
-          "description": "Displays an error message if the session is invalid.",
-          "condition": "When the session_id does not correspond to a valid session",
+          "description": "Displays a message indicating that the payment confirmation does not belong to the user's account.",
+          "condition": "When the session's customer email does not match the logged-in user's email.",
           "confidence": "verified"
         },
         {
           "element": "div",
-          "description": "Displays an unauthorized message if the session does not belong to the logged-in user.",
-          "condition": "When the session's customer email does not match the logged-in user's email",
+          "description": "Displays the donation summary and action buttons.",
+          "condition": "When the session status is 'complete'.",
           "confidence": "verified"
         }
       ]
     },
     {
       "path": "/tax-summary/[year]",
-      "description": "This page displays the tax summary for donations made in a specified year, including total donations and a breakdown by temple.",
+      "description": "This page displays the tax summary for donations made in a specified year, including total donations and detailed breakdowns by temple.",
       "preconditions": [
         "User must be logged in",
-        "User must have made donations in the specified year"
+        "User must have access to view donation data for the specified year"
       ],
       "interactions": [
         {
@@ -1286,27 +1621,21 @@
       "navigation": [],
       "conditionalElements": [
         {
-          "element": "p.text-muted-foreground",
-          "description": "Displays a message indicating that there are no donations for the selected year.",
-          "condition": "When there are no donations recorded for the specified year.",
+          "element": "No donations this year message",
+          "description": "This message appears when there are no donations recorded for the specified year.",
+          "condition": "When there are no donations for the selected year.",
           "confidence": "verified"
         },
         {
-          "element": "ul.space-y-2",
-          "description": "Displays a list of donations grouped by temple when there are donations for the specified year.",
-          "condition": "When there are donations recorded for the specified year.",
+          "element": "Totals by Temple list",
+          "description": "This list displays the total donations categorized by temple when there are donations for the year.",
+          "condition": "When there are donations recorded for the selected year.",
           "confidence": "verified"
         },
         {
-          "element": "div.space-y-2",
-          "description": "Displays a list of all donations made in the specified year.",
-          "condition": "When there are donations recorded for the specified year.",
-          "confidence": "verified"
-        },
-        {
-          "element": "p.text-muted-foreground",
-          "description": "Displays a message indicating that there are no donations for the selected year.",
-          "condition": "When there are no donations recorded for the specified year.",
+          "element": "All Donations section",
+          "description": "This section lists all individual donations made during the specified year.",
+          "condition": "When there are donations recorded for the selected year.",
           "confidence": "verified"
         }
       ]

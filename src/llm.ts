@@ -107,6 +107,8 @@ The output JSON must match this exact schema:
 Guidelines:
 - Write descriptions from the perspective of what an AI agent needs to know to USE the site, not to understand the code.
 - Be concise but complete. Every interactive element must be described.
+- CRITICAL: You MUST include ALL navigation links listed in the AST-Extracted section in your output's "navigation" array. The agent needs to know every link available on each page, including sidebar/header navigation from shared layouts.
+- Deduplicate identical links but do not omit any unique destinations.
 - If the code uses server actions (Next.js "use server"), the action IS the API endpoint.
 - For Convex mutations/queries, describe them as API calls with the function path as the endpoint.
 - Infer preconditions from conditional rendering, auth checks, and route guards.
@@ -121,8 +123,8 @@ function buildPrompt(route: Route, analysis: ComponentAnalysis): string {
 
   // Source code (truncated if too long)
   const source =
-    analysis.sourceCode.length > 8000
-      ? analysis.sourceCode.slice(0, 8000) + "\n... (truncated)"
+    analysis.sourceCode.length > 15000
+      ? analysis.sourceCode.slice(0, 15000) + "\n... (truncated)"
       : analysis.sourceCode;
   parts.push("## Source Code:");
   parts.push("```tsx");
