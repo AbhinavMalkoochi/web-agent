@@ -33,11 +33,29 @@ export async function analyze(config: CrawlerConfig): Promise<void> {
   console.log("");
 
   // 3. Analyze each route's component tree (follows imports recursively)
+  //    Also includes the layout file's tree if present (sidebar navigation, etc.)
   const analyses = routes.map((route) => {
     const file = files.find((f) => f.path === route.filePath);
     if (!file) return null;
     console.log(`   Analyzing ${route.path}...`);
-    return { route, analysis: analyzeComponentTree(file, files, sourceDir) };
+    const pageAnalysis = analyzeComponentTree(file, files, sourceDir);
+
+    // Also analyze the layout file if it exists (contains shared navigation)
+    if (route.layoutFile) {
+      const layoutFile = files.find((f) => f.path === route.layoutFile);
+      if (layoutFile) {
+        const layoutAnalysis = analyzeComponentTree(layoutFile, files, sourceDir);
+        // Merge layout interactions into the page analysis
+        pageAnalysis.interactions.push(...layoutAnalysis.interactions);
+        pageAnalysis.apiCalls.push(...layoutAnalysis.apiCalls);
+        pageAnalysis.conditionals.push(...layoutAnalysis.conditionals);
+        pageAnalysis.imports.push(...layoutAnalysis.imports);
+        // Append layout source for LLM context
+        pageAnalysis.sourceCode += "\n\n// === LAYOUT ===\n" + layoutAnalysis.sourceCode;
+      }
+    }
+
+    return { route, analysis: pageAnalysis };
   }).filter(Boolean) as Array<{ route: typeof routes[0]; analysis: ReturnType<typeof analyzeComponentTree> }>;
 
   // 4. LLM enrichment (or AST-only fallback)

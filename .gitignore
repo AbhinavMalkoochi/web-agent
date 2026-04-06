@@ -3,3 +3,5 @@ dist/
 .env
 *.tsbuildinfo
 .crawler-cache/
+browser.txt
+eval-report*.json

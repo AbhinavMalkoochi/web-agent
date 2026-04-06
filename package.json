@@ -12,7 +12,8 @@
     "lint": "tsc --noEmit",
     "start": "node dist/cli.js",
     "analyze": "node dist/cli.js analyze",
-    "agent": "node dist/cli.js agent"
+    "navigate": "node dist/cli.js navigate",
+    "eval": "node dist/cli.js eval"
   },
   "keywords": [
     "ai",
