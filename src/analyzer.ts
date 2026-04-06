@@ -396,11 +396,32 @@ function detectApiCall(call: t.CallExpression, source: string): ApiCall | null {
     return endpoint ? { method, endpoint } : null;
   }
 
+  // Convex: useQuery(api.donations.getDevoteeDashboardStats, args)
+  // Convex: useMutation(api.donations.create)
+  if (t.isIdentifier(call.callee) && ["useQuery", "useMutation", "useAction"].includes(call.callee.name)) {
+    const firstArg = call.arguments[0];
+    if (firstArg && firstArg.start != null && firstArg.end != null) {
+      const endpoint = source.slice(firstArg.start, firstArg.end);
+      const method = call.callee.name === "useQuery" ? "QUERY" : "MUTATION";
+      return { method, endpoint };
+    }
+  }
+
   // Server action calls or mutation hooks — detect by naming patterns
   if (t.isIdentifier(call.callee)) {
     const name = call.callee.name;
-    if (/^(use)?mutation/i.test(name) || /^(create|update|delete|submit|send)/i.test(name)) {
+    if (/^(create|update|delete|submit|send|post|put|patch)/i.test(name)) {
       return { method: "INFERRED", endpoint: `[${name}]` };
+    }
+  }
+
+  // Detect calls like: api.someModule.someFunction()
+  if (t.isMemberExpression(call.callee)) {
+    const obj = call.callee.object;
+    if (t.isMemberExpression(obj) && t.isIdentifier(obj.object) && obj.object.name === "api") {
+      if (call.callee.start != null && call.callee.end != null) {
+        return { method: "API", endpoint: source.slice(call.callee.start, call.callee.end) };
+      }
     }
   }
 

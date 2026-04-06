@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { readFileSync } from "fs";
 import { discoverFiles } from "./discovery.js";
 import { extractNextRoutes } from "./routes.js";
-import { analyzeComponent } from "./analyzer.js";
+import { analyzeComponentTree } from "./tree.js";
 import { describeRoute, fallbackDescription } from "./llm.js";
 import { compileBrowserTxt, writeBrowserTxt, summarize } from "./compiler.js";
 import type { CrawlerConfig, PageDescription } from "./types.js";
@@ -32,13 +32,13 @@ export async function analyze(config: CrawlerConfig): Promise<void> {
   }
   console.log("");
 
-  // 3. Analyze each route's component
+  // 3. Analyze each route's component tree (follows imports recursively)
   const analyses = routes.map((route) => {
     const file = files.find((f) => f.path === route.filePath);
     if (!file) return null;
     console.log(`   Analyzing ${route.path}...`);
-    return { route, analysis: analyzeComponent(file.path, file.content) };
-  }).filter(Boolean) as Array<{ route: typeof routes[0]; analysis: ReturnType<typeof analyzeComponent> }>;
+    return { route, analysis: analyzeComponentTree(file, files, sourceDir) };
+  }).filter(Boolean) as Array<{ route: typeof routes[0]; analysis: ReturnType<typeof analyzeComponentTree> }>;
 
   // 4. LLM enrichment (or AST-only fallback)
   const pages: PageDescription[] = [];
