@@ -1,62 +1,61 @@
 [
   {
-    "name": "Navigate to Dashboard",
-    "goal": "Navigate to the dashboard page from the home page",
+    "name": "Navigate to Onboarding",
+    "goal": "Navigate to the onboarding page. Once you reach /onboarding, you are done.",
     "startUrl": "http://localhost:3000",
     "successCriteria": {
-      "finalUrlContains": "/dashboard",
-      "maxSteps": 5,
-      "maxDurationMs": 30000
-    }
-  },
-  {
-    "name": "Navigate to Donations",
-    "goal": "Navigate to the donations page to view donation history",
-    "startUrl": "http://localhost:3000",
-    "successCriteria": {
-      "finalUrlContains": "/dashboard/donations",
-      "maxSteps": 6,
-      "maxDurationMs": 30000
-    }
-  },
-  {
-    "name": "Navigate to Profile",
-    "goal": "Navigate to the user profile settings page",
-    "startUrl": "http://localhost:3000",
-    "successCriteria": {
-      "finalUrlContains": "/dashboard/profile",
-      "maxSteps": 6,
-      "maxDurationMs": 30000
-    }
-  },
-  {
-    "name": "Navigate to Tax Forms",
-    "goal": "Find and navigate to the tax forms section",
-    "startUrl": "http://localhost:3000/dashboard",
-    "successCriteria": {
-      "finalUrlContains": "/dashboard/tax-forms",
-      "maxSteps": 5,
-      "maxDurationMs": 30000
-    }
-  },
-  {
-    "name": "Navigate to Payments from Dashboard",
-    "goal": "Go to the payments page from the dashboard",
-    "startUrl": "http://localhost:3000/dashboard",
-    "successCriteria": {
-      "finalUrlContains": "/dashboard/payments",
-      "maxSteps": 4,
+      "finalUrlContains": "/onboarding",
+      "maxSteps": 3,
       "maxDurationMs": 20000
     }
   },
   {
-    "name": "Navigate to Onboarding",
-    "goal": "Navigate to the onboarding page to set up a new account",
+    "name": "Find Devotee Onboarding",
+    "goal": "Navigate to the devotee onboarding page at /onboarding/devotee. Once you reach it, you are done.",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/onboarding/devotee",
+      "maxSteps": 5,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Find Temple Onboarding Step 1",
+    "goal": "Navigate to the first step of the temple onboarding at /onboarding/temple/step1. Once you reach it, you are done.",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/onboarding/temple/step1",
+      "maxSteps": 5,
+      "maxDurationMs": 30000
+    }
+  },
+  {
+    "name": "Navigate to Return Page",
+    "goal": "Navigate to the /return page. Once you reach it, you are done — do not click any links on the page.",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "finalUrlContains": "/return",
+      "maxSteps": 3,
+      "maxDurationMs": 15000
+    }
+  },
+  {
+    "name": "Explore Onboarding Options",
+    "goal": "Navigate to the onboarding page and identify what account types are available, then report done.",
     "startUrl": "http://localhost:3000",
     "successCriteria": {
       "finalUrlContains": "/onboarding",
-      "maxSteps": 5,
-      "maxDurationMs": 30000
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "Navigate to Dashboard (Auth Required)",
+    "goal": "Navigate to /dashboard. If you are redirected to a sign-in page, report that auth is required and mark done.",
+    "startUrl": "http://localhost:3000",
+    "successCriteria": {
+      "maxSteps": 4,
+      "maxDurationMs": 25000
     }
   }
 ]

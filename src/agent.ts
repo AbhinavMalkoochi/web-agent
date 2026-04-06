@@ -73,6 +73,29 @@ export async function runAgent(task: AgentTask): Promise<AgentResult> {
       const pageInfo = findPageInSiteMap(currentPath, siteMap);
       const pageContent = await getPageText(page);
 
+      // Detect loops: consecutive repeats OR ping-pong patterns
+      const loopDetected = detectLoop(steps);
+      if (loopDetected) {
+        console.log(`   ⚠️  ${loopDetected}`);
+        steps.push({
+          step: stepNum,
+          action: "DONE",
+          reasoning: loopDetected,
+          timestamp: Date.now(),
+          durationMs: 0,
+          success: true,
+        });
+        return {
+          task: task.goal,
+          success: false,
+          steps,
+          totalDurationMs: Date.now() - startTime,
+          totalSteps: steps.length,
+          finalUrl: page.url(),
+          error: loopDetected,
+        };
+      }
+
       // Ask the LLM what to do next
       const decision = await planNextStep(openai, task.model, {
         goal: task.goal,
@@ -125,7 +148,16 @@ export async function runAgent(task: AgentTask): Promise<AgentResult> {
             waitUntil: "networkidle",
             timeout: 15000,
           });
-          step.success = true;
+          // Detect auth redirects: if we ended up on a different page
+          const finalUrl = page.url();
+          const targetPath = new URL(targetUrl).pathname;
+          const finalPath = new URL(finalUrl).pathname;
+          if (finalPath !== targetPath) {
+            step.success = false;
+            step.reasoning += ` → REDIRECTED to ${finalPath} (likely auth required)`;
+          } else {
+            step.success = true;
+          }
         } else if (decision.action === "click") {
           const urlBefore = page.url();
           await smartClick(page, decision.selector || "", decision.label || "");
@@ -138,7 +170,7 @@ export async function runAgent(task: AgentTask): Promise<AgentResult> {
           }
           step.success = true;
         } else if (decision.action === "fill") {
-          await page.fill(decision.selector || "", decision.value || "");
+          await page.fill(decision.selector || "", decision.value || "", { timeout: 5000 });
           step.success = true;
         } else if (decision.action === "wait") {
           await page.waitForTimeout(2000);
@@ -215,17 +247,15 @@ For each step, respond with a JSON object:
   "reasoning": "brief explanation of why this action moves toward the goal"
 }
 
-Rules:
-- PREFERRED: Use "navigate" with a path from the site map (e.g. "/dashboard/donations") to go directly to any page. This is the fastest and most reliable approach.
-- Use "click" only for buttons, form submissions, or interactive elements that aren't navigation links.
-- For navigation, prefer "navigate" with the path over "click" on a link — it's faster and more reliable.
-- Use the site map to identify which page has the elements you need.
-- Prefer clicking by text content (button text, link text) over CSS selectors.
-- For "click", provide a selector like 'text=Button Text' or 'button:has-text("Submit")'.
-- Return "DONE" when the goal is achieved or you've confirmed the task is complete.
-- If an action fails, try a different approach rather than repeating the same action.
-- Be decisive: each step should make concrete progress toward the goal.
-- If the goal is simply to navigate somewhere, use "navigate" and then "DONE".`;
+CRITICAL RULES:
+1. NAVIGATE FIRST: Use "navigate" with a path from the site map (e.g. "/dashboard/donations") to go directly to any page. This is faster and more reliable than clicking links.
+2. DONE EARLY: Once you have reached the page that matches the goal, return "DONE" IMMEDIATELY. Do NOT keep interacting after reaching the target. If the goal says "navigate to X" and you are now on X, you are DONE.
+3. NO REPETITION: NEVER repeat the same action more than once. If an action failed or didn't change the page, try a completely different approach or return "DONE".
+4. AUTH DETECTION: If you see a REDIRECTED message in previous steps, it means authentication is required. Return "DONE" immediately explaining the auth requirement.
+5. ONE-SHOT NAVIGATION: If the goal is to navigate somewhere and the site map has the path, use a single "navigate" action, then "DONE". Do not click buttons or fill forms for pure navigation tasks.
+6. STAY PUT: After navigating to the target page, do NOT click any links or buttons that would take you away from it.
+7. Prefer clicking by text content (button text, link text) over CSS selectors: 'text=Button Text' or 'button:has-text("Submit")'.
+8. Be decisive: each step should make concrete progress toward the goal.`;
 
 async function planNextStep(
   openai: OpenAI,
@@ -285,6 +315,46 @@ What is the next action to achieve the goal? Respond with a single JSON object.`
   }
 }
 
+// ─── Loop Detection ──────────────────────────────────────────────────────────
+
+function stepKey(s: AgentStep): string {
+  return `${s.action}::${s.selector || s.url || ""}`;
+}
+
+function detectLoop(steps: AgentStep[]): string | null {
+  if (steps.length < 2) return null;
+
+  // Pattern 1: Same action repeated 3+ times (A-A-A)
+  const last = steps[steps.length - 1];
+  const lastKey = stepKey(last);
+  let repeatCount = 0;
+  for (let i = steps.length - 1; i >= 0; i--) {
+    if (stepKey(steps[i]) === lastKey) repeatCount++;
+    else break;
+  }
+  if (repeatCount >= 2) return `Loop detected: same action repeated ${repeatCount + 1} times. Forcing DONE.`;
+
+  // Pattern 2: Ping-pong (A-B-A-B) — check last 4 steps
+  if (steps.length >= 4) {
+    const s = steps.slice(-4);
+    if (stepKey(s[0]) === stepKey(s[2]) && stepKey(s[1]) === stepKey(s[3]) && stepKey(s[0]) !== stepKey(s[1])) {
+      return `Loop detected: ping-pong pattern (alternating actions). Forcing DONE.`;
+    }
+  }
+
+  // Pattern 3: URL oscillation — visited same URL 3+ times
+  if (steps.length >= 4) {
+    const urlSteps = steps.filter((s) => s.url);
+    if (urlSteps.length >= 3) {
+      const lastUrl = urlSteps[urlSteps.length - 1].url;
+      const visits = urlSteps.filter((s) => s.url === lastUrl).length;
+      if (visits >= 3) return `Loop detected: same URL visited ${visits} times. Forcing DONE.`;
+    }
+  }
+
+  return null;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function findPageInSiteMap(path: string, siteMap: BrowserTxt): PageDescription | null {
@@ -316,7 +386,7 @@ async function smartClick(page: Page, selector: string, label: string): Promise<
   // Try the selector first
   try {
     const el = page.locator(selector).first();
-    if (await el.isVisible({ timeout: 3000 })) {
+    if (await el.isVisible({ timeout: 2000 })) {
       await el.click();
       return;
     }
@@ -328,7 +398,7 @@ async function smartClick(page: Page, selector: string, label: string): Promise<
   if (label) {
     try {
       const textEl = page.getByText(label, { exact: false }).first();
-      if (await textEl.isVisible({ timeout: 3000 })) {
+      if (await textEl.isVisible({ timeout: 2000 })) {
         await textEl.click();
         return;
       }
@@ -341,7 +411,7 @@ async function smartClick(page: Page, selector: string, label: string): Promise<
   if (label) {
     try {
       const roleEl = page.getByRole("button", { name: label }).first();
-      if (await roleEl.isVisible({ timeout: 3000 })) {
+      if (await roleEl.isVisible({ timeout: 2000 })) {
         await roleEl.click();
         return;
       }
@@ -351,7 +421,7 @@ async function smartClick(page: Page, selector: string, label: string): Promise<
 
     try {
       const linkEl = page.getByRole("link", { name: label }).first();
-      if (await linkEl.isVisible({ timeout: 3000 })) {
+      if (await linkEl.isVisible({ timeout: 2000 })) {
         await linkEl.click();
         return;
       }
@@ -361,5 +431,5 @@ async function smartClick(page: Page, selector: string, label: string): Promise<
   }
 
   // Last resort: try the raw selector
-  await page.click(selector, { timeout: 5000 });
+  await page.click(selector, { timeout: 3000 });
 }
