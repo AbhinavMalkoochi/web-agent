@@ -115,14 +115,27 @@ export async function runAgent(task: AgentTask): Promise<AgentResult> {
         }
 
         if (decision.action === "navigate") {
-          await page.goto(decision.url || task.startUrl, {
+          // Construct full URL if only a path is given
+          let targetUrl = decision.url || task.startUrl;
+          if (targetUrl.startsWith("/")) {
+            const base = new URL(task.startUrl);
+            targetUrl = `${base.origin}${targetUrl}`;
+          }
+          await page.goto(targetUrl, {
             waitUntil: "networkidle",
             timeout: 15000,
           });
           step.success = true;
         } else if (decision.action === "click") {
+          const urlBefore = page.url();
           await smartClick(page, decision.selector || "", decision.label || "");
-          await page.waitForTimeout(1000);
+          // If the click triggered a navigation, wait for it
+          const urlAfter = page.url();
+          if (urlAfter !== urlBefore) {
+            await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+          } else {
+            await page.waitForTimeout(800);
+          }
           step.success = true;
         } else if (decision.action === "fill") {
           await page.fill(decision.selector || "", decision.value || "");
@@ -197,19 +210,22 @@ For each step, respond with a JSON object:
   "action": "navigate" | "click" | "fill" | "wait" | "DONE",
   "selector": "CSS selector or text content to target (for click/fill)",
   "label": "human-readable label of the element (for click)",
-  "url": "full URL (for navigate)",
+  "url": "full URL or just path like /dashboard (for navigate)",
   "value": "text to type (for fill)",
   "reasoning": "brief explanation of why this action moves toward the goal"
 }
 
 Rules:
+- PREFERRED: Use "navigate" with a path from the site map (e.g. "/dashboard/donations") to go directly to any page. This is the fastest and most reliable approach.
+- Use "click" only for buttons, form submissions, or interactive elements that aren't navigation links.
+- For navigation, prefer "navigate" with the path over "click" on a link — it's faster and more reliable.
 - Use the site map to identify which page has the elements you need.
-- Navigate to the correct page FIRST, then interact with elements on it.
 - Prefer clicking by text content (button text, link text) over CSS selectors.
 - For "click", provide a selector like 'text=Button Text' or 'button:has-text("Submit")'.
 - Return "DONE" when the goal is achieved or you've confirmed the task is complete.
-- If stuck, try a different approach rather than repeating failed actions.
-- Be decisive: each step should make concrete progress toward the goal.`;
+- If an action fails, try a different approach rather than repeating the same action.
+- Be decisive: each step should make concrete progress toward the goal.
+- If the goal is simply to navigate somewhere, use "navigate" and then "DONE".`;
 
 async function planNextStep(
   openai: OpenAI,
