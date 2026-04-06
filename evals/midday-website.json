@@ -1,0 +1,361 @@
+[
+  {
+    "name": "1. Navigate to Pricing",
+    "goal": "Navigate to the pricing page. Once you reach /pricing, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/pricing",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "2. Navigate to About",
+    "goal": "Navigate to the about page. Once you reach /about, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/about",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "3. Navigate to Downloads",
+    "goal": "Navigate to the download page. Once there, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/download",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "4. Navigate to Integrations",
+    "goal": "Navigate to the integrations page. Once you reach /integrations, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/integrations",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "5. Navigate to Docs",
+    "goal": "Navigate to the documentation page. Once you reach /docs, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/docs",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "6. Find Time Tracking Feature",
+    "goal": "Navigate to the time tracking feature page. Once you reach /time-tracking, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/time-tracking",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "7. Find Invoicing Feature",
+    "goal": "Navigate to the invoicing feature page. Once you reach /invoicing, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/invoicing",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "8. Find File Storage Feature",
+    "goal": "Navigate to the file storage feature page. Once you reach /file-storage, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/file-storage",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "9. Navigate to Inbox",
+    "goal": "Navigate to the inbox feature page. Once you reach /inbox, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/inbox",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "10. Navigate to Insights",
+    "goal": "Navigate to the financial insights page. Once you reach /insights, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/insights",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "11. Navigate to Transactions",
+    "goal": "Navigate to the transactions feature page. Once you reach /transactions, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/transactions",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "12. Navigate to MCP Hub",
+    "goal": "Navigate to the MCP (Model Context Protocol) page. Once you reach /mcp, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "13. Find MCP for Claude",
+    "goal": "Navigate to the MCP integration page for Claude. Once you reach /mcp/claude, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/claude",
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  },
+  {
+    "name": "14. Find MCP for Cursor",
+    "goal": "Navigate to the MCP integration page for Cursor. Once you reach /mcp/cursor, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/cursor",
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  },
+  {
+    "name": "15. Find MCP for ChatGPT",
+    "goal": "Navigate to the MCP integration page for ChatGPT. Once you reach /mcp/chatgpt, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/chatgpt",
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  },
+  {
+    "name": "16. Navigate to AI Agents",
+    "goal": "Navigate to the AI agents page. Once you reach /agents, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/agents",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "17. Navigate to AI Assistant",
+    "goal": "Navigate to the AI assistant feature page. Once you reach /assistant, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/assistant",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "18. Navigate to Customers",
+    "goal": "Navigate to the customers page. Once you reach /customers, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/customers",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "19. Navigate to Updates/Blog",
+    "goal": "Navigate to the updates/blog page. Once you reach /updates, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/updates",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "20. Find Privacy Policy",
+    "goal": "Navigate to the privacy policy page. Once you reach /policy, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/policy",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "21. Find Terms of Service",
+    "goal": "Navigate to the terms of service page. Once you reach /terms, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/terms",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "22. Navigate to SDKs",
+    "goal": "Navigate to the SDKs page. Once you reach /sdks, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/sdks",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "23. Navigate to Support",
+    "goal": "Navigate to the support page. Once you reach /support, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/support",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "24. Navigate to Testimonials",
+    "goal": "Navigate to the testimonials page. Once you reach /testimonials, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/testimonials",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "25. Find Pre-Accounting Feature",
+    "goal": "Navigate to the pre-accounting feature page. Once you reach /pre-accounting, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/pre-accounting",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "26. Navigate to Bank Coverage",
+    "goal": "Navigate to the bank coverage page. Once you reach /bank-coverage, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/bank-coverage",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "27. Navigate to Company Story",
+    "goal": "Navigate to the company story page. Once you reach /story, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/story",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "28. Find Compare Page",
+    "goal": "Navigate to the comparison page where Midday is compared with alternatives. Once you reach /compare, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/compare",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "29. Navigate from Pricing to Invoicing",
+    "goal": "Starting from the pricing page, navigate to the invoicing feature page. Once you reach /invoicing, you are done.",
+    "startUrl": "https://midday.ai/pricing",
+    "successCriteria": {
+      "finalUrlContains": "/invoicing",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "30. Navigate from About to Pricing",
+    "goal": "Starting from the about page, navigate to the pricing page. Once you reach /pricing, you are done.",
+    "startUrl": "https://midday.ai/about",
+    "successCriteria": {
+      "finalUrlContains": "/pricing",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "31. Deep Nav: MCP Zapier from Homepage",
+    "goal": "Navigate to the MCP integration page for Zapier. Once you reach /mcp/zapier, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/zapier",
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  },
+  {
+    "name": "32. Deep Nav: MCP Windsurf from Homepage",
+    "goal": "Navigate to the MCP integration page for Windsurf. Once you reach /mcp/windsurf, you are done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/windsurf",
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  },
+  {
+    "name": "33. Cross-feature: Inbox to Time Tracking",
+    "goal": "Starting from the inbox page, navigate to the time tracking page. Once you reach /time-tracking, you are done.",
+    "startUrl": "https://midday.ai/inbox",
+    "successCriteria": {
+      "finalUrlContains": "/time-tracking",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "34. Cross-feature: Transactions to File Storage",
+    "goal": "Starting from the transactions page, navigate to the file storage page. Once you reach /file-storage, you are done.",
+    "startUrl": "https://midday.ai/transactions",
+    "successCriteria": {
+      "finalUrlContains": "/file-storage",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "35. Navigate to MCP Gemini from MCP Hub",
+    "goal": "Starting from the MCP page, navigate to the Gemini MCP integration page. Once you reach /mcp/gemini, you are done.",
+    "startUrl": "https://midday.ai/mcp",
+    "successCriteria": {
+      "finalUrlContains": "/mcp/gemini",
+      "maxSteps": 3,
+      "maxDurationMs": 20000
+    }
+  },
+  {
+    "name": "36. Navigate to Login (Auth Check)",
+    "goal": "Navigate to the login/sign-in page. If you are redirected to an external auth provider, report it and mark done.",
+    "startUrl": "https://midday.ai",
+    "successCriteria": {
+      "maxSteps": 4,
+      "maxDurationMs": 25000
+    }
+  }
+]

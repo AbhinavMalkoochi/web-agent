@@ -26,14 +26,17 @@ export function extractNextRoutes(files: DiscoveredFile[], sourceDir: string): R
     if (appIndex === -1) continue;
 
     const routeSegments = segments.slice(appIndex + 1, -1); // drop "app" and "page.tsx"
-    const routePath = "/" + routeSegments.join("/") || "/";
+
+    // Strip Next.js route groups (parenthesized segments like (app), (sidebar), (public))
+    const cleanSegments = routeSegments.filter((s) => !s.startsWith("(") || !s.endsWith(")"));
+    const routePath = "/" + cleanSegments.join("/") || "/";
 
     // Find the closest layout file
     const dir = dirname(file.path);
     const layoutFile = findClosestLayout(dir, root, layoutFiles);
 
-    // Extract component name from file
-    const componentName = deriveComponentName(routeSegments);
+    // Extract component name from file (use clean segments without route groups)
+    const componentName = deriveComponentName(cleanSegments);
 
     routes.push({
       path: routePath === "/" ? "/" : routePath,

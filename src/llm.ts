@@ -26,7 +26,10 @@ export async function describeRoute(
   const prompt = buildPrompt(route, analysis);
 
   try {
-    const response = await openai.chat.completions.create({
+    const promptLen = prompt.length;
+    console.log(`      [LLM] ${route.path}: prompt=${promptLen} chars`);
+    
+    const apiCall = openai.chat.completions.create({
       model,
       temperature: 0.1,
       response_format: { type: "json_object" },
@@ -34,7 +37,13 @@ export async function describeRoute(
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: prompt },
       ],
-    }, { timeout: 60000 });
+    });
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("LLM timeout after 60s")), 60000)
+    );
+
+    const response = await Promise.race([apiCall, timeout]);
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
@@ -46,7 +55,8 @@ export async function describeRoute(
       ...parsed,
       path: route.path,
     };
-  } catch {
+  } catch (err: any) {
+    console.log(`      [LLM] ${route.path}: FAILED - ${err.message}`);
     return fallbackDescription(route, analysis);
   }
 }
@@ -121,10 +131,14 @@ function buildPrompt(route: Route, analysis: ComponentAnalysis): string {
   parts.push(`## Component: ${analysis.componentName} (${analysis.filePath})`);
   parts.push("");
 
-  // Source code (truncated if too long)
+  // Adaptively truncate source code based on interaction count
+  // More interactions = less source needed (they tell the story)
+  const maxSourceLen = analysis.interactions.length > 50 ? 6000
+    : analysis.interactions.length > 20 ? 10000
+    : 15000;
   const source =
-    analysis.sourceCode.length > 15000
-      ? analysis.sourceCode.slice(0, 15000) + "\n... (truncated)"
+    analysis.sourceCode.length > maxSourceLen
+      ? analysis.sourceCode.slice(0, maxSourceLen) + "\n... (truncated)"
       : analysis.sourceCode;
   parts.push("## Source Code:");
   parts.push("```tsx");
@@ -132,10 +146,14 @@ function buildPrompt(route: Route, analysis: ComponentAnalysis): string {
   parts.push("```");
   parts.push("");
 
-  // AST-extracted structure
+  // AST-extracted structure (deduplicated)
   if (analysis.interactions.length > 0) {
     parts.push("## AST-Extracted Interactive Elements:");
+    const seen = new Set<string>();
     for (const el of analysis.interactions) {
+      const key = `${el.type}|${el.label || ""}|${el.href || ""}|${el.handler || ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       parts.push(
         `- ${el.type}: ${el.label || "(no label)"} | handler: ${el.handlerType || "none"}=${el.handler || "none"} | selector: ${el.selector || "?"}`
       );

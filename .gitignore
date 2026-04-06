@@ -5,3 +5,5 @@ dist/
 .crawler-cache/
 browser.txt
 eval-report*.json
+midday-*.txt
+evals/*-report.json

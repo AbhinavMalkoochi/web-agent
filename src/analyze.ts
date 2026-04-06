@@ -74,8 +74,8 @@ export async function analyze(config: CrawlerConfig): Promise<void> {
   } else {
     console.log(`\n🤖 Sending ${analyses.length} pages to LLM (${config.model})...\n`);
 
-    // Run LLM calls in parallel with concurrency limit of 5
-    const CONCURRENCY = 5;
+    // Run LLM calls in parallel with concurrency limit of 3
+    const CONCURRENCY = 3;
     const pending = analyses.map(({ route, analysis }) => ({
       route,
       analysis,
@@ -86,14 +86,25 @@ export async function analyze(config: CrawlerConfig): Promise<void> {
 
     for (let i = 0; i < pending.length; i += CONCURRENCY) {
       const batch = pending.slice(i, i + CONCURRENCY);
-      const batchResults = await Promise.all(
+      const batchResults = await Promise.allSettled(
         batch.map(async ({ route, analysis }) => {
-          const page = await describeRoute(route, analysis, config.openaiApiKey!, config.model);
-          console.log(`   Describing ${route.path}... ✓ (${page.interactions.length} interactions)`);
-          return { route, page };
+          try {
+            const page = await describeRoute(route, analysis, config.openaiApiKey!, config.model);
+            console.log(`   Describing ${route.path}... ✓ (${page.interactions.length} interactions)`);
+            return { route, page };
+          } catch (err: any) {
+            console.log(`   Describing ${route.path}... ✗ (${err.message})`);
+            throw err;
+          }
         })
       );
-      results.push(...batchResults);
+      for (const result of batchResults) {
+        if (result.status === "fulfilled") {
+          results.push(result.value);
+        } else {
+          console.log(`   ⚠ LLM failed for a page: ${result.reason?.message || result.reason}`);
+        }
+      }
     }
 
     // Sort results back to original order

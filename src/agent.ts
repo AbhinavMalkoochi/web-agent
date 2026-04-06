@@ -150,8 +150,8 @@ export async function runAgent(task: AgentTask): Promise<AgentResult> {
           });
           // Detect auth redirects: if we ended up on a different page
           const finalUrl = page.url();
-          const targetPath = new URL(targetUrl).pathname;
-          const finalPath = new URL(finalUrl).pathname;
+          const targetPath = new URL(targetUrl).pathname.replace(/\/$/, "") || "/";
+          const finalPath = new URL(finalUrl).pathname.replace(/\/$/, "") || "/";
           if (finalPath !== targetPath) {
             step.success = false;
             step.reasoning += ` → REDIRECTED to ${finalPath} (likely auth required)`;
@@ -251,7 +251,7 @@ CRITICAL RULES:
 1. NAVIGATE FIRST: Use "navigate" with a path from the site map (e.g. "/dashboard/donations") to go directly to any page. This is faster and more reliable than clicking links.
 2. DONE EARLY: Once you have reached the page that matches the goal, return "DONE" IMMEDIATELY. Do NOT keep interacting after reaching the target. If the goal says "navigate to X" and you are now on X, you are DONE.
 3. NO REPETITION: NEVER repeat the same action more than once. If an action failed or didn't change the page, try a completely different approach or return "DONE".
-4. AUTH DETECTION: If you see a REDIRECTED message in previous steps, it means authentication is required. Return "DONE" immediately explaining the auth requirement.
+4. AUTH DETECTION: If you see a REDIRECTED message in previous steps AND the final URL is a login/auth page (e.g. /login, /sign-in, /auth), it means authentication is required. Return "DONE" immediately. Trailing slash redirects (e.g. /pricing → /pricing/) are NOT auth redirects.
 5. ONE-SHOT NAVIGATION: If the goal is to navigate somewhere and the site map has the path, use a single "navigate" action, then "DONE". Do not click buttons or fill forms for pure navigation tasks.
 6. STAY PUT: After navigating to the target page, do NOT click any links or buttons that would take you away from it.
 7. Prefer clicking by text content (button text, link text) over CSS selectors: 'text=Button Text' or 'button:has-text("Submit")'.

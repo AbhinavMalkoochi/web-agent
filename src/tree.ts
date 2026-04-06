@@ -46,7 +46,7 @@ export function analyzeComponentTree(
  * Resolve an import path to an absolute file path.
  * Handles:
  *  - Relative imports: ./foo, ../bar
- *  - @/ alias (Next.js convention, maps to source root)
+ *  - @/ alias (Next.js convention, maps to source root or src/)
  */
 function resolveImport(
   importPath: string,
@@ -57,8 +57,16 @@ function resolveImport(
   let basePath: string;
 
   if (importPath.startsWith("@/")) {
-    // @/ alias → source root
-    basePath = resolve(sourceRoot, importPath.slice(2));
+    // @/ alias → try source root, then source root + src/
+    const stripped = importPath.slice(2);
+    basePath = resolve(sourceRoot, stripped);
+    // If not found at root, try src/ subdirectory (common in Next.js with src/ convention)
+    if (!tryResolveFile(basePath, allFiles)) {
+      const srcPath = resolve(sourceRoot, "src", stripped);
+      if (tryResolveFile(srcPath, allFiles)) {
+        basePath = srcPath;
+      }
+    }
   } else if (importPath.startsWith(".")) {
     basePath = resolve(dirname(fromFile), importPath);
   } else {
@@ -81,6 +89,17 @@ function resolveImport(
   if (allFiles.some((f) => f.path === basePath)) return basePath;
 
   return null;
+}
+
+/** Check if a basePath resolves to any known file (with extension or /index) */
+function tryResolveFile(basePath: string, allFiles: DiscoveredFile[]): boolean {
+  for (const ext of EXTENSIONS) {
+    if (allFiles.some((f) => f.path === basePath + ext)) return true;
+  }
+  for (const ext of EXTENSIONS) {
+    if (allFiles.some((f) => f.path === join(basePath, `index${ext}`))) return true;
+  }
+  return allFiles.some((f) => f.path === basePath);
 }
 
 /**
